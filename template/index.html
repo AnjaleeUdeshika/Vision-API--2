@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <title>Vision API - Image to Text</title>
+  </head>
+  <body>
+    <div class="container">
+      
+        <table>
+        <tbody>
+          <tr>
+            {%for value in labelName%}
+            <th><h2>{{value}}</h2></th>
+            {%endfor%}
+          </tr>
+          <tr>
+            {%for value in labelScore%}
+            <td><h3>{{value}}</h3></t>
+            {%endfor%}
+          </tr>
+        
+        </tbody>
+      </table>
+      <form action="/lable" method="post">
+        <input class="btn" type="submit" value="View All Lables" />
+      </form>
+    </div>
+  </body>
+</html>
