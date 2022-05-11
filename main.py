@@ -6,7 +6,7 @@ from flask import Flask, render_template , request
 
 app = Flask(__name__, template_folder='template')
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "cloud-work-shop-cf633c35db2b.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "anjalee-cloud-work-space-ca1fff86b175.json"
 
 # Imports the Google Cloud client library
 @app.route('/', methods=['GET', 'POST'])
@@ -20,7 +20,7 @@ def index():
 def lable():
     from google.cloud import vision
 
-    image_uri = 'gs://cloud-work-shop/cloudTestImg.jpg'
+    image_uri = 'gs://anjalee_cloud_work_space/cloudimg.jpg'
 
     # Instantiates a client
     client = vision.ImageAnnotatorClient()
