@@ -1,51 +1,70 @@
-import io
+from fileinput import filename
+from flask import Flask, request, render_template
+from google.cloud import vision
+from google.cloud import storage
 import os
+import sys
 
-from flask import Flask, render_template , request
 
+app = Flask(__name__, template_folder="templates")
 
-app = Flask(__name__, template_folder='template')
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "anjalee-cloud-workshop-p2.json"
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "anjalee-cloud-work-space-ca1fff86b175.json"
-
-# Imports the Google Cloud client library
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == 'POST':
-        print("Data Received Successfully !!!")
-    return render_template('index.html')
+    return render_template("main.html")
 
 
-@app.route('/lable', methods=['GET', 'POST'])
-def lable():
-    from google.cloud import vision
+@app.route("/display", methods=["GET", "POST"])
+def uploadimg():
 
-    image_uri = 'gs://anjalee_cloud_work_space/cloudimg.jpg'
 
-    # Instantiates a client
+    file = request.files['file']
+
+    # filename = request.files['filename']
+
+    """Uploads a file to the bucket."""
+    
+    # print(filename)
+
+    # The ID of your GCS bucket
+    bucket_name = "anjalee-cloud-workshop-p2.appspot.com"
+
+
+    destination_blob_name = '%s/%s' % ('image', file.filename)
+
+    # The ID of your GCS object
+    source_file_name = ('gs://anjalee-cloud-workshop-p2.appspot.com/image/' + file.filename)
+    
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name, chunk_size=262144 * 5)
+
+    blob.upload_from_file(file, file.content_type)
+
+
+    object = []
+    isEmpty = False
     client = vision.ImageAnnotatorClient()
     image = vision.Image()
-    image.source.image_uri = image_uri
+    image.source.image_uri = source_file_name
 
-    # Performs label detection on the image file
-    response = client.label_detection(image=image)
+    response = client.web_detection(image=image)
+    annotations = response.web_detection
 
-    print('Labels (and confidence score):')
-    
+    if annotations.pages_with_matching_images:
 
-    labels = response.label_annotations
-    
-    labelName = []
-    labelScore = []
+        for page in annotations.pages_with_matching_images:
+            if page.full_matching_images:
+                object.append(format(page.url))
+                print(object)
+    else:
+        isEmpty = True
 
-    for label in labels:
-        resultV = label.description
-        labelName.append(resultV)
-        resultS = '%.2f%%' % (label.score*100.)
-        labelScore.append(resultS)
-
-    return render_template('index.html', labelName=labelName, labelScore=labelScore)
+    return render_template('main.html', object=object, isEmpty=isEmpty)
 
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)
+
+    
